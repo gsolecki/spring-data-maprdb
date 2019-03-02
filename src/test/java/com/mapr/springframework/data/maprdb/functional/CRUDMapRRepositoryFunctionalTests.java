@@ -1,21 +1,26 @@
 package com.mapr.springframework.data.maprdb.functional;
 
-import com.mapr.db.MapRDB;
 import com.mapr.springframework.data.maprdb.model.User;
 import com.mapr.springframework.data.maprdb.functional.repository.UserRepository;
 import com.mapr.springframework.data.maprdb.utils.UserUtils;
-import org.junit.*;
+import org.apache.commons.collections.CollectionUtils;
+import org.junit.After;
+import org.junit.Assert;
+import org.junit.Before;
+import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.test.context.ContextConfiguration;
 import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import org.ojai.store.exceptions.DocumentExistsException;
 
-import java.util.*;
+import java.util.Arrays;
+import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { MapRTestConfiguration.class })
+@ContextConfiguration(classes = {MapRTestConfiguration.class})
 public class CRUDMapRRepositoryFunctionalTests {
 
     @Autowired
@@ -35,7 +40,6 @@ public class CRUDMapRRepositoryFunctionalTests {
     @Test
     public void countTest() {
         List<User> users = UserUtils.getUsers();
-
         users = repository.saveAll(users);
 
         Assert.assertEquals(users.size(), repository.count());
@@ -44,12 +48,11 @@ public class CRUDMapRRepositoryFunctionalTests {
     @Test
     public void saveAndFindTest() {
         User user = UserUtils.getUser();
-
         user = repository.save(user);
+        Optional<User> opUser = repository.findById(user.getId());
 
-        User userFromDB = repository.findById(user.getId()).get();
-
-        Assert.assertEquals(user, userFromDB);
+        Assert.assertTrue(opUser.isPresent());
+        Assert.assertEquals(user, opUser.get());
     }
 
     @Test
@@ -59,42 +62,38 @@ public class CRUDMapRRepositoryFunctionalTests {
         user.setName("new_test_user");
         user = repository.save(user);
 
-        User userFromDB = repository.findById(user.getId()).get();
+        Optional<User> opUser = repository.findById(user.getId());
 
-        Assert.assertEquals(user, userFromDB);
+        Assert.assertTrue(opUser.isPresent());
+        Assert.assertEquals(user, opUser.get());
     }
 
     @Test
     public void multipleSaveAndFindTest() {
         List<User> users = UserUtils.getUsers();
-
         users = repository.saveAll(users);
-
         List<User> usersFromDB = repository.findAll();
 
-        Assert.assertEquals(new HashSet<>(users), new HashSet<>(usersFromDB));
+        Assert.assertTrue(CollectionUtils.isEqualCollection(users, usersFromDB));
     }
 
     @Test
     public void insertTest() {
         User user = UserUtils.getUser();
-
         user = repository.insert(user);
+        Optional<User> opUser =  repository.findById(user.getId());
 
-        User userFromDB = repository.findById(user.getId()).get();
-
-        Assert.assertEquals(user, userFromDB);
+        Assert.assertTrue(opUser.isPresent());
+        Assert.assertEquals(user, opUser.get());
     }
 
     @Test
     public void multipleInsertTest() {
         List<User> users = UserUtils.getUsers();
-
         users = repository.insert(users);
-
         List<User> usersFromDB = repository.findAll();
 
-        Assert.assertEquals(new HashSet<>(users), new HashSet<>(usersFromDB));
+        Assert.assertTrue(CollectionUtils.isEqualCollection(users, usersFromDB));
     }
 
     @Test(expected = DocumentExistsException.class)
@@ -108,13 +107,13 @@ public class CRUDMapRRepositoryFunctionalTests {
     @Test
     public void findAllByIdTest() {
         List<User> users = UserUtils.getUsers();
-
         users = repository.saveAll(users);
         List<User> usersForSearch = Arrays.asList(users.get(5), users.get(10), users.get(20));
         List<String> ids = usersForSearch.stream().map(User::getId).collect(Collectors.toList());
         List<User> usersFromDB = repository.findAllById(ids);
 
-        Assert.assertEquals(new HashSet<>(usersForSearch), new HashSet<>(usersFromDB));
+        Assert.assertEquals(usersForSearch.size(), usersFromDB.size());
+        Assert.assertTrue(CollectionUtils.isEqualCollection(usersForSearch, usersFromDB));
     }
 
     @Test
@@ -125,7 +124,6 @@ public class CRUDMapRRepositoryFunctionalTests {
         user2 = repository.save(user2);
 
         repository.delete(user1);
-
         List<User> users = repository.findAll();
 
         Assert.assertEquals(1, users.size());
@@ -140,7 +138,6 @@ public class CRUDMapRRepositoryFunctionalTests {
         user2 = repository.save(user2);
 
         repository.deleteById(user1.getId());
-
         List<User> users = repository.findAll();
 
         Assert.assertEquals(1, users.size());
@@ -150,7 +147,6 @@ public class CRUDMapRRepositoryFunctionalTests {
     @Test
     public void deleteAllTest() {
         repository.saveAll(UserUtils.getUsers());
-
         repository.deleteAll();
 
         Assert.assertEquals(0, repository.findAll().size());
@@ -159,29 +155,25 @@ public class CRUDMapRRepositoryFunctionalTests {
     @Test
     public void multipleDeleteTest() {
         List<User> users = UserUtils.getUsers();
-
         users = repository.saveAll(users);
-
         User user = users.get(3);
-
         users.remove(3);
-
         repository.deleteAll(users);
 
-        User userFromDB = repository.findById(user.getId()).get();
+        Optional<User> opUser =  repository.findById(user.getId());
 
-        Assert.assertEquals(user, userFromDB);
+        Assert.assertTrue(opUser.isPresent());
+        Assert.assertEquals(user, opUser.get());
     }
-    
+
     @Test
     public void existByIdTest() {
         User user = UserUtils.getUser();
         user.setId("123");
 
         Assert.assertFalse(repository.existsById(user.getId()));
-        
-        user = repository.save(user);
 
+        user = repository.save(user);
         Assert.assertTrue(repository.existsById(user.getId()));
     }
 

@@ -17,7 +17,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { MapRTestConfiguration.class })
+@ContextConfiguration(classes = {MapRTestConfiguration.class})
 public class MapROperationsFunctionalTests {
 
     public final static String TABLE_NAME = "/user";
@@ -76,9 +76,7 @@ public class MapROperationsFunctionalTests {
     @Test
     public void executeQueryTest() {
         mapROperations.createTable(User.class);
-
         Query query = mapROperations.getConnection().newQuery().select("_id").orderBy("_id").limit(1).build();
-
         List<User> list = mapROperations.execute(query, User.class);
 
         Assert.assertNotNull(list);
@@ -87,9 +85,7 @@ public class MapROperationsFunctionalTests {
     @Test
     public void executeQueryConditionTest() {
         mapROperations.createTable(User.class);
-
         QueryCondition condition = mapROperations.getConnection().newCondition().build();
-
         List<User> list = mapROperations.execute(condition, User.class);
 
         Assert.assertNotNull(list);

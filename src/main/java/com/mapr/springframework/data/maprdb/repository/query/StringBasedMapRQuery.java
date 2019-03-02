@@ -4,7 +4,7 @@ import com.mapr.springframework.data.maprdb.core.MapROperations;
 import org.ojai.store.Query;
 import org.springframework.data.repository.query.QueryMethod;
 
-public class StringBasedMapRQuery extends AbstractMapRQuery{
+public class StringBasedMapRQuery extends AbstractMapRQuery {
 
     protected String query;
 

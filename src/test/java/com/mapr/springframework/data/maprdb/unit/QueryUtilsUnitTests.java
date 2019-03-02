@@ -147,17 +147,22 @@ public class QueryUtilsUnitTests {
     }
 
     public String formatCondition(String name, Object value) {
-        if(value.getClass() == String.class)
+        if (value.getClass() == String.class)
             return String.format("(%s = \"%s\")", name, value);
-        else if(value.getClass() == Date.class) {
+        else if (value.getClass() == Date.class) {
             SimpleDateFormat sdf = new SimpleDateFormat("yyyy-MM-dd'T'HH:mm:ss.SSS'Z'");
             sdf.setTimeZone(TimeZone.getTimeZone("UTC"));
             return String.format("(%s = {\"$date\":\"%s\"})", name, sdf.format(value));
-        } else if(value.getClass() == Long.class || value.getClass() == Byte.class
-                || value.getClass() ==  Integer.class || value.getClass() ==  Short.class)
+        } else if (value.getClass() == Long.class)
             return String.format("(%s = {\"$numberLong\":%s})", name, value);
-        else if(value.getClass() == Float.class)
-            return String.format("(%s = %2.0f)", name, value);
+        else if (value.getClass() == Byte.class)
+            return String.format("(%s = {\"$numberByte\":%s})", name, value);
+        else if (value.getClass() == Integer.class)
+            return String.format("(%s = {\"$numberInt\":%s})", name, value);
+        else if (value.getClass() == Short.class)
+            return String.format("(%s = {\"$numberShort\":%s})", name, value);
+        else if (value.getClass() == Float.class)
+            return String.format("(%s = {\"$numberFloat\":%3.1f})", name, value);
         else
             return String.format("(%s = %s)", name, value);
     }

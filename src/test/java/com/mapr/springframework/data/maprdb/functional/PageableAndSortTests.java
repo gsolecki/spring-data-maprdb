@@ -24,9 +24,7 @@ public class PageableAndSortTests extends AbstractFunctionalTests {
 
 
         Assert.assertEquals(usersPerPage, pagedUsers.getSize());
-
         Assert.assertEquals(LIST_SIZE, pagedUsers.getTotalElements());
-
         Assert.assertEquals(LIST_SIZE / usersPerPage, pagedUsers.getTotalPages());
 
         List<User> filteredUsers = users.stream().sorted(Comparator.comparing(User::getId))
@@ -43,9 +41,7 @@ public class PageableAndSortTests extends AbstractFunctionalTests {
                 PageRequest.of(pageNumber, usersPerPage, Sort.Direction.ASC, "name"));
 
         Assert.assertEquals(usersPerPage, pagedUsers.getSize());
-
         Assert.assertEquals(LIST_SIZE, pagedUsers.getTotalElements());
-
         Assert.assertEquals(LIST_SIZE / usersPerPage, pagedUsers.getTotalPages());
 
         List<User> filteredUsers = users.stream().sorted(Comparator.comparing(User::getName))
@@ -84,7 +80,6 @@ public class PageableAndSortTests extends AbstractFunctionalTests {
     public void pageableNamedQueryTest() {
         int expectedPage = 2;
         int expectedNumberOfUsers = 13;
-
         List<User> usersFromDB = repository.findByEnabledFalse(PageRequest.of(expectedPage, expectedNumberOfUsers));
 
         Assert.assertEquals(expectedNumberOfUsers, usersFromDB.size());
@@ -99,11 +94,9 @@ public class PageableAndSortTests extends AbstractFunctionalTests {
     public void sortNamedQueryTest() {
         List<User> expectedUsers = users.stream().sorted(Comparator.comparing(User::getName))
                 .collect(Collectors.toList());
-
         List<User> usersFromDB = repository.findFirst100ByOrderByNameAsc();
 
         Assert.assertEquals(expectedUsers.size(), usersFromDB.size());
-
         Assert.assertEquals(expectedUsers, usersFromDB);
     }
 
@@ -115,19 +108,17 @@ public class PageableAndSortTests extends AbstractFunctionalTests {
         List<User> usersFromDB = repository.findFirst100ByEnabledFalse(new Sort(Sort.Direction.DESC, "name"));
 
         Assert.assertEquals(expectedUsers.size(), usersFromDB.size());
-
         Assert.assertEquals(expectedUsers, usersFromDB);
     }
 
     @Test
     public void multipleSortParameterQuery() {
-        List<User> usersFromDB = repository.findFirst100ByEnabledFalse(new Sort(Sort.Direction.ASC,"name", "_id"));
-
+        List<User> usersFromDB = repository.findFirst100ByEnabledFalse(new Sort(Sort.Direction.ASC, "name",
+                "_id"));
         List<User> expectedUsers = users.stream().sorted(Comparator.comparing(User::getName).thenComparing(User::getId))
                 .collect(Collectors.toList());
 
         Assert.assertEquals(expectedUsers.size(), usersFromDB.size());
-
         Assert.assertEquals(expectedUsers, usersFromDB);
     }
 

@@ -1,6 +1,5 @@
 package com.mapr.springframework.data.maprdb.core;
 
-import com.mapr.db.Table;
 import org.ojai.store.Connection;
 import org.ojai.store.DocumentStore;
 import org.ojai.store.Query;
@@ -13,9 +12,9 @@ public interface MapROperations {
 
     Connection getConnection();
 
-    <T> Table createTable(Class<T> entityClass);
+    <T> void createTable(Class<T> entityClass);
 
-    Table createTable(final String tableName);
+    void createTable(final String tableName);
 
     <T> void dropTable(Class<T> entityClass);
 
@@ -47,7 +46,7 @@ public interface MapROperations {
 
     <T> T save(T objectToSave, final String tableName);
 
-    <T> List<T> save(Iterable<T>  objectsToSave);
+    <T> List<T> save(Iterable<T> objectsToSave);
 
     void remove(Object object);
 

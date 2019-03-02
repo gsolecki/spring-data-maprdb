@@ -4,7 +4,11 @@ import com.mapr.springframework.data.maprdb.core.MapROperations;
 import com.mapr.springframework.data.maprdb.repository.MapRRepository;
 import com.mapr.springframework.data.maprdb.repository.query.QueryUtils;
 import org.ojai.store.Query;
-import org.springframework.data.domain.*;
+import org.springframework.data.domain.Example;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 
 import java.util.List;
 import java.util.Optional;
@@ -21,7 +25,7 @@ public class SimpleMapRRepository<T, ID> implements MapRRepository<T, ID> {
         this.maprOperations = maprOperations;
         this.domainClass = domainClass;
 
-        if(!maprOperations.tableExists(domainClass))
+        if (!maprOperations.tableExists(domainClass))
             maprOperations.createTable(domainClass);
     }
 

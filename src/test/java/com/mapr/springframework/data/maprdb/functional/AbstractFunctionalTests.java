@@ -14,7 +14,7 @@ import org.springframework.test.context.junit4.SpringJUnit4ClassRunner;
 import java.util.List;
 
 @RunWith(SpringJUnit4ClassRunner.class)
-@ContextConfiguration(classes = { MapRTestConfiguration.class })
+@ContextConfiguration(classes = {MapRTestConfiguration.class})
 public abstract class AbstractFunctionalTests {
 
     @Autowired
@@ -27,7 +27,7 @@ public abstract class AbstractFunctionalTests {
 
     @Before
     public void init() {
-        if(!operations.tableExists(User.class))
+        if (!operations.tableExists(User.class))
             operations.createTable(User.class);
 
         delete();

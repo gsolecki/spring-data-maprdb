@@ -2,21 +2,31 @@ package com.mapr.springframework.data.maprdb.core;
 
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.mapr.db.MapRDB;
-import com.mapr.db.Table;
 
 import com.mapr.springframework.data.maprdb.core.mapping.Document;
 import com.mapr.springframework.data.maprdb.core.mapping.MapRId;
 import com.mapr.springframework.data.maprdb.core.mapping.MapRJsonConverter;
 import org.ojai.DocumentStream;
-import org.ojai.store.*;
+import org.ojai.store.Connection;
+import org.ojai.store.DocumentStore;
+import org.ojai.store.DriverManager;
+import org.ojai.store.Query;
+import org.ojai.store.QueryCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.annotation.Id;
+
 import java.lang.reflect.Field;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
-import java.util.*;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.Iterator;
+import java.util.LinkedList;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -63,13 +73,13 @@ public class MapRTemplate implements MapROperations {
     }
 
     @Override
-    public <T> Table createTable(Class<T> entityClass) {
-        return createTable(getTablePath(entityClass));
+    public <T> void createTable(Class<T> entityClass) {
+        createTable(getTablePath(entityClass));
     }
 
     @Override
-    public Table createTable(final String tableName) {
-        return MapRDB.createTable(getPath(tableName));
+    public void createTable(final String tableName) {
+        MapRDB.createTable(getPath(tableName));
     }
 
     @Override
@@ -150,7 +160,7 @@ public class MapRTemplate implements MapROperations {
     @Override
     public <T> List<T> insert(Iterable<T> objectsToSave) {
         Iterator<T> itr = objectsToSave.iterator();
-        if(itr.hasNext()) {
+        if (itr.hasNext()) {
             Class type = itr.next().getClass();
             DocumentStore store = getStore(getTablePath(type));
             Class idClass = getIdType(type);
@@ -195,7 +205,7 @@ public class MapRTemplate implements MapROperations {
     @Override
     public <T> List<T> save(Iterable<T> objectsToSave) {
         Iterator<T> itr = objectsToSave.iterator();
-        if(itr.hasNext()) {
+        if (itr.hasNext()) {
             Class type = itr.next().getClass();
             DocumentStore store = getStore(getTablePath(type));
             Class idClass = getIdType(type);
@@ -240,7 +250,7 @@ public class MapRTemplate implements MapROperations {
     @Override
     public <T> void remove(Iterable<T> objectsToDelete) {
         Iterator<T> itr = objectsToDelete.iterator();
-        if(itr.hasNext()) {
+        if (itr.hasNext()) {
             Class type = itr.next().getClass();
             DocumentStore store = getStore(getTablePath(type));
             StreamSupport.stream(objectsToDelete.spliterator(), false)
@@ -287,7 +297,7 @@ public class MapRTemplate implements MapROperations {
         return execute(query, entityClass, getTablePath(entityClass));
     }
 
-    private  <T> List<T> execute(Query query, Class<T> entityClass, String tableName) {
+    private <T> List<T> execute(Query query, Class<T> entityClass, String tableName) {
         DocumentStore store = getStore(tableName);
 
         List<T> list = convertDocumentStreamToIterable(store.find(query), entityClass);
@@ -309,7 +319,7 @@ public class MapRTemplate implements MapROperations {
     }
 
     private String getPath(String className) {
-        if(databaseName.startsWith("/"))
+        if (databaseName.startsWith("/"))
             return String.format("%s%s", databaseName, className);
         else
             return String.format("/%s%s", databaseName, className);
@@ -318,10 +328,10 @@ public class MapRTemplate implements MapROperations {
     private <T> String getTablePath(Class<T> entityClass) {
         String className = entityClass.getAnnotation(Document.class).value();
 
-        if(className.isEmpty())
+        if (className.isEmpty())
             className = entityClass.getSimpleName().toLowerCase();
 
-        if(className.startsWith("/"))
+        if (className.startsWith("/"))
             return className;
         else
             return String.format("/%s", className);
@@ -342,9 +352,9 @@ public class MapRTemplate implements MapROperations {
 
     private Class getIdType(Class entityClass) {
         Optional<Field> optional = Arrays.stream(entityClass.getDeclaredFields())
-                .filter(f-> f.getAnnotation(Id.class) != null || f.getAnnotation(MapRId.class) != null).findFirst();
+                .filter(f -> f.getAnnotation(Id.class) != null || f.getAnnotation(MapRId.class) != null).findFirst();
 
-        if(optional.isPresent())
+        if (optional.isPresent())
             return optional.get().getType();
         else
             throw new RuntimeJsonMappingException("Id was not found in class " + entityClass.toString());

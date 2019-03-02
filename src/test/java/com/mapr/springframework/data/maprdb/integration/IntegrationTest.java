@@ -2,11 +2,15 @@ package com.mapr.springframework.data.maprdb.integration;
 
 import com.mapr.db.MapRDB;
 import com.mapr.springframework.data.maprdb.utils.PropertiesReader;
-import org.junit.*;
+import org.junit.AfterClass;
+import org.junit.Assert;
+import org.junit.BeforeClass;
+import org.junit.Test;
 import org.ojai.Document;
 import org.ojai.DocumentStream;
 import org.ojai.store.DocumentStore;
 import org.ojai.store.Query;
+
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.sql.Statement;
@@ -35,14 +39,14 @@ public class IntegrationTest {
         destroy();
         Thread.sleep(delay);
 
-        if(!MapRDB.tableExists(TABLE_PATH))
+        if (!MapRDB.tableExists(TABLE_PATH))
             MapRDB.createTable(TABLE_PATH);
 
     }
 
     @AfterClass
-    public static void destroy() throws InterruptedException {
-        if(MapRDB.tableExists(TABLE_PATH))
+    public static void destroy() {
+        if (MapRDB.tableExists(TABLE_PATH))
             MapRDB.deleteTable(TABLE_PATH);
     }
 
@@ -110,7 +114,7 @@ public class IntegrationTest {
 
         ResultSet result = statement.executeQuery(sql);
 
-        while(result.next()){
+        while (result.next()) {
             System.out.println(result.getString(1));
         }
 

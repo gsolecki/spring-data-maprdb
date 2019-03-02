@@ -12,7 +12,11 @@ import org.springframework.data.repository.query.parser.PartTree;
 
 import java.math.BigDecimal;
 import java.nio.ByteBuffer;
-import java.util.*;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Date;
+import java.util.Iterator;
 
 public class QueryUtils {
 
@@ -21,15 +25,15 @@ public class QueryUtils {
 
         QueryCondition conditions = connection.newCondition();
 
-        for(PartTree.OrPart orPart : tree) {
+        for (PartTree.OrPart orPart : tree) {
             QueryCondition cond = convertOrPartToQueryCondition(connection, orPart, parametersIterator);
-            if(conditions.isEmpty())
+            if (conditions.isEmpty())
                 conditions.or().condition(cond);
             else
                 conditions.condition(cond);
         }
 
-        if(!conditions.isEmpty())
+        if (!conditions.isEmpty())
             conditions.close();
 
         return conditions.build();
@@ -39,9 +43,9 @@ public class QueryUtils {
 
         QueryCondition condition = connection.newCondition();
 
-        for(Part p : orPart) {
+        for (Part p : orPart) {
             QueryCondition cond = convertPartToQueryCondition(connection, p, itr);
-            if(condition.isEmpty())
+            if (condition.isEmpty())
                 condition.and().condition(cond);
             else
                 condition.condition(cond);
@@ -56,17 +60,17 @@ public class QueryUtils {
         QueryCondition condition = connection.newCondition();
 
         Object parameters;
-        switch(part.getType()) {
+        switch (part.getType()) {
             case SIMPLE_PROPERTY:
                 parameters = itr.next();
-                if(!(parameters instanceof Collection<?>))
+                if (!(parameters instanceof Collection<?>))
                     setIsCondition(condition, name, QueryCondition.Op.EQUAL, parameters);
                 else
                     throw new UnsupportedOperationException(part.getType().toString() + " method with Example is not supported yet");
                 break;
             case NEGATING_SIMPLE_PROPERTY:
                 parameters = itr.next();
-                if(!(parameters instanceof Collection<?>))
+                if (!(parameters instanceof Collection<?>))
                     setIsCondition(condition, name, QueryCondition.Op.NOT_EQUAL, parameters);
                 else
                     throw new UnsupportedOperationException(part.getType().toString() + " method with Example is not supported yet");
@@ -125,7 +129,7 @@ public class QueryUtils {
     }
 
     public static Query addSortToQuery(Query query, Sort sort) {
-        for(Sort.Order o : sort)
+        for (Sort.Order o : sort)
             query = query.orderBy(o.getProperty(), o.isAscending() ? SortOrder.ASC : SortOrder.DESC);
 
         return query;
@@ -137,41 +141,41 @@ public class QueryUtils {
 
     public static QueryCondition setIsCondition(QueryCondition condition, String name, QueryCondition.Op op, Object object) {
 
-        if(object instanceof BigDecimal)
+        if (object instanceof BigDecimal)
             condition.is(name, op, (BigDecimal) object);
 
-        else if(object instanceof Boolean)
+        else if (object instanceof Boolean)
             condition.is(name, op, Boolean.parseBoolean(object.toString()));
 
-        else if(object instanceof Byte)
+        else if (object instanceof Byte)
             condition.is(name, op, (Byte) object);
 
-        else if(object instanceof ByteBuffer)
+        else if (object instanceof ByteBuffer)
             condition.is(name, op, (ByteBuffer) object);
 
-        else if(object instanceof Double)
+        else if (object instanceof Double)
             condition.is(name, op, (Double) object);
 
-        else if(object instanceof Float)
+        else if (object instanceof Float)
             condition.is(name, op, (Float) object);
 
-        else if(object instanceof Integer)
+        else if (object instanceof Integer)
             condition.is(name, op, (Integer) object);
 
-        else if(object instanceof Long)
+        else if (object instanceof Long)
             condition.is(name, op, (Long) object);
 
-        else if(object instanceof Short)
+        else if (object instanceof Short)
             condition.is(name, op, (Short) object);
 
-        else if(object instanceof Date)
+        else if (object instanceof Date)
             condition.is(name, op, new OTimestamp((Date) object));
 
-        else if(object instanceof String)
+        else if (object instanceof String)
             condition.is(name, op, object.toString());
 
         else
-            throw new UnsupportedOperationException(object.getClass().getCanonicalName() +  " type is not supported");
+            throw new UnsupportedOperationException(object.getClass().getCanonicalName() + " type is not supported");
 
         return condition;
     }

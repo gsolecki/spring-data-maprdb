@@ -10,7 +10,7 @@ public class MapRAnnotationIntrospector extends JacksonAnnotationIntrospector {
 
     @Override
     public PropertyName findNameForSerialization(Annotated a) {
-        if(isId(a))
+        if (isId(a))
             return PropertyName.construct("_id");
         else
             return super.findNameForSerialization(a);
@@ -18,7 +18,7 @@ public class MapRAnnotationIntrospector extends JacksonAnnotationIntrospector {
 
     @Override
     public PropertyName findNameForDeserialization(Annotated a) {
-        if(isId(a))
+        if (isId(a))
             return PropertyName.construct("_id");
         else
             return super.findNameForDeserialization(a);
@@ -26,7 +26,7 @@ public class MapRAnnotationIntrospector extends JacksonAnnotationIntrospector {
 
     @Override
     public JsonInclude.Value findPropertyInclusion(Annotated a) {
-        if(isId(a))
+        if (isId(a))
             return JsonInclude.Value.construct(JsonInclude.Include.NON_NULL, JsonInclude.Include.NON_NULL);
         else
             return super.findPropertyInclusion(a);

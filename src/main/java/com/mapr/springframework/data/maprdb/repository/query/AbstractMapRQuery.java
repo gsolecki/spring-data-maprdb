@@ -6,6 +6,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.data.repository.query.QueryMethod;
 import org.springframework.data.repository.query.RepositoryQuery;
+
 import java.util.List;
 
 public abstract class AbstractMapRQuery implements RepositoryQuery {
@@ -25,7 +26,7 @@ public abstract class AbstractMapRQuery implements RepositoryQuery {
     @Override
     public Object execute(Object[] parameters) {
 
-        if(isDeleteQuery()) {
+        if (isDeleteQuery()) {
             operations.execute(convertToQuery(parameters), domainClass).forEach(operations::remove);
             return null;
         }
@@ -48,23 +49,23 @@ public abstract class AbstractMapRQuery implements RepositoryQuery {
 
     protected Object convertToFormat(List records) {
 
-        if(method.getReturnedObjectType() == null)
+        if (method.getReturnedObjectType() == null)
             return null;
 
-        if(method.isCollectionQuery())
+        if (method.isCollectionQuery())
             return records;
 
-        if(method.isStreamQuery())
+        if (method.isStreamQuery())
             return records.stream();
 
         // TODO Make normal count queries
-        if(isCountQuery()) {
+        if (isCountQuery()) {
             LOGGER.warn("Count queries are working not in optimal way, please don't use them without necessity");
             return records.size();
         }
 
         // TODO Make normal exists queries
-        if(isExistsQuery()) {
+        if (isExistsQuery()) {
             LOGGER.warn("Exists queries are working not in optimal way, please don't use them without necessity");
             return records.size() > 0;
         }

@@ -1,9 +1,9 @@
 apply plugin: 'java'
 
 ext {
-    springVersion = "5.1.1.RELEASE"
-    springDataVersion = "2.1.1.RELEASE"
-    mapRVersion = "6.0.1-mapr"
+    springVersion = "5.1.5.RELEASE"
+    springDataVersion = "2.1.5.RELEASE"
+    mapRVersion = "6.1.0-mapr"
     zookeeperVersion = "3.4.11-mapr-1808"
     drillJdbcVersion = "1.14.0-mapr"
 }

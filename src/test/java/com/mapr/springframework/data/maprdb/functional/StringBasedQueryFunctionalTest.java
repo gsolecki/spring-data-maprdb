@@ -1,10 +1,10 @@
 package com.mapr.springframework.data.maprdb.functional;
 
 import com.mapr.springframework.data.maprdb.model.User;
+import org.apache.commons.collections.CollectionUtils;
 import org.junit.Assert;
 import org.junit.Test;
 
-import java.util.HashSet;
 import java.util.List;
 
 public class StringBasedQueryFunctionalTest extends AbstractFunctionalTests {
@@ -33,8 +33,7 @@ public class StringBasedQueryFunctionalTest extends AbstractFunctionalTests {
         List<User> usersFromDB = repository.findAll();
 
         Assert.assertEquals(users.size(), usersFromDB.size());
-
-        Assert.assertEquals(new HashSet<>(users), new HashSet<>(users));
+        Assert.assertTrue(CollectionUtils.isEqualCollection(users, usersFromDB));
     }
 
 }
