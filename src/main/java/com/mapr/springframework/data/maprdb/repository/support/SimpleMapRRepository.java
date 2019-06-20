@@ -73,7 +73,6 @@ public class SimpleMapRRepository<T, ID> implements MapRRepository<T, ID> {
     @Override
     public long count() {
         return maprOperations.count(domainClass);
-        //throw new UnsupportedOperationException("count method is not supported yet");
     }
 
     @Override

@@ -51,8 +51,7 @@ public class CRUDMapRRepositoryFunctionalTests {
         user = repository.save(user);
         Optional<User> opUser = repository.findById(user.getId());
 
-        Assert.assertTrue(opUser.isPresent());
-        Assert.assertEquals(user, opUser.get());
+        Assert.assertEquals(user, opUser.orElse(null));
     }
 
     @Test
@@ -64,8 +63,7 @@ public class CRUDMapRRepositoryFunctionalTests {
 
         Optional<User> opUser = repository.findById(user.getId());
 
-        Assert.assertTrue(opUser.isPresent());
-        Assert.assertEquals(user, opUser.get());
+        Assert.assertEquals(user, opUser.orElse(null));
     }
 
     @Test
@@ -83,8 +81,7 @@ public class CRUDMapRRepositoryFunctionalTests {
         user = repository.insert(user);
         Optional<User> opUser =  repository.findById(user.getId());
 
-        Assert.assertTrue(opUser.isPresent());
-        Assert.assertEquals(user, opUser.get());
+        Assert.assertEquals(user, opUser.orElse(null));
     }
 
     @Test
@@ -162,8 +159,7 @@ public class CRUDMapRRepositoryFunctionalTests {
 
         Optional<User> opUser =  repository.findById(user.getId());
 
-        Assert.assertTrue(opUser.isPresent());
-        Assert.assertEquals(user, opUser.get());
+        Assert.assertEquals(user, opUser.orElse(null));
     }
 
     @Test

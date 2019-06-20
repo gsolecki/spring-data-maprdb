@@ -2,6 +2,7 @@ package com.mapr.springframework.data.maprdb.integration;
 
 import com.mapr.db.MapRDB;
 import com.mapr.springframework.data.maprdb.utils.PropertiesReader;
+import org.apache.hadoop.security.UserGroupInformation;
 import org.junit.AfterClass;
 import org.junit.Assert;
 import org.junit.BeforeClass;
@@ -31,7 +32,7 @@ public class IntegrationTest {
         Properties properties = PropertiesReader.getProperties("src/test/resources/tests.properties");
 
         TABLE_PATH = String.format("/%s/user", properties.getProperty("database.name"));
-        USERNAME = properties.getProperty("database.user");
+        USERNAME = properties.getProperty("database.username");
         PASSWORD = properties.getProperty("database.password");
         DRILL_JDBC_URL = String.format("jdbc:drill:drillbit=%s", properties.getProperty("database.host"));
         long delay = Long.parseLong(properties.getProperty("database.delay"));
@@ -72,6 +73,8 @@ public class IntegrationTest {
     @Test
     public void ojaiDrillConnectionTest() {
         System.out.println("==== OJAI Drill Application ===");
+
+        UserGroupInformation.setLoginUser(UserGroupInformation.createUserForTesting(USERNAME, new String[]{PASSWORD}));
 
         org.ojai.store.Connection connection = org.ojai.store.DriverManager.getConnection("ojai:mapr:");
         DocumentStore store = connection.getStore(TABLE_PATH);

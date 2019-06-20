@@ -2,7 +2,6 @@ package com.mapr.springframework.data.maprdb.core;
 
 import com.fasterxml.jackson.databind.RuntimeJsonMappingException;
 import com.mapr.db.MapRDB;
-
 import com.mapr.springframework.data.maprdb.core.mapping.Document;
 import com.mapr.springframework.data.maprdb.core.mapping.MapRId;
 import com.mapr.springframework.data.maprdb.core.mapping.MapRJsonConverter;
@@ -14,6 +13,8 @@ import org.ojai.store.Query;
 import org.ojai.store.QueryCondition;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+import org.springframework.dao.DataAccessException;
+import org.springframework.dao.support.PersistenceExceptionTranslator;
 import org.springframework.data.annotation.Id;
 
 import java.lang.reflect.Field;
@@ -32,33 +33,32 @@ import java.util.stream.StreamSupport;
 
 public class MapRTemplate implements MapROperations {
 
-    private final static Logger LOGGER = LoggerFactory.getLogger(MapRTemplate.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(MapRTemplate.class);
 
     private final String databaseName;
     private org.ojai.store.Connection ojaiConnection;
     private java.sql.Connection drillConnection;
     private MapRJsonConverter converter;
+    private final PersistenceExceptionTranslator exceptionTranslator;
 
     public MapRTemplate(final String databaseName, final String host, final String username, final String password) {
-        converter = new MapRJsonConverter();
-        this.databaseName = databaseName;
-        this.ojaiConnection = getNewOjaiConnection();
-        this.drillConnection = getNewDrillConnection(host, username, password);
+        this(databaseName, getNewOjaiConnection(), getNewDrillConnection(host, username, password));
     }
 
     protected MapRTemplate(final String databaseName, org.ojai.store.Connection ojaiConnection,
                            java.sql.Connection drillConnection) {
         converter = new MapRJsonConverter();
+        this.exceptionTranslator = new MapRExceptionTranslator();
         this.databaseName = databaseName;
         this.ojaiConnection = ojaiConnection;
         this.drillConnection = drillConnection;
     }
 
-    private org.ojai.store.Connection getNewOjaiConnection() {
+    private static org.ojai.store.Connection getNewOjaiConnection() {
         return DriverManager.getConnection("ojai:mapr:");
     }
 
-    private java.sql.Connection getNewDrillConnection(String host, String username, String password) {
+    private static java.sql.Connection getNewDrillConnection(String host, String username, String password) {
         try {
             Class.forName("org.apache.drill.jdbc.Driver");
             return java.sql.DriverManager.getConnection(String.format("jdbc:drill:drillbit=%s", host), username, password);
@@ -273,17 +273,13 @@ public class MapRTemplate implements MapROperations {
 
     @Override
     public <T> long count(Class<T> entityClass) {
-        try {
-            Statement statement = drillConnection.createStatement();
-            String query = String.format("SELECT COUNT(*) FROM dfs.`%s`", getPath(getTablePath(entityClass)));
-            ResultSet resultSet = statement.executeQuery(query);
+        String query = String.format("SELECT COUNT(*) FROM dfs.`%s`", getPath(getTablePath(entityClass)));
+        try (Statement statement = drillConnection.createStatement();
+             ResultSet resultSet = statement.executeQuery(query)) {
             resultSet.next();
-            long totalRow = Long.parseLong(resultSet.getString(1));
-            statement.close();
-            return totalRow;
-        } catch (SQLException ex) {
-            LOGGER.error(ex.getMessage());
-            throw new RuntimeException(ex.getMessage(), ex.getCause());
+            return Long.parseLong(resultSet.getString(1));
+        } catch (SQLException e) {
+            throw potentiallyConvertRuntimeException(new RuntimeException(e), exceptionTranslator);
         }
     }
 
@@ -299,6 +295,10 @@ public class MapRTemplate implements MapROperations {
 
     private <T> List<T> execute(Query query, Class<T> entityClass, String tableName) {
         DocumentStore store = getStore(tableName);
+
+        if (LOGGER.isDebugEnabled()) {
+            LOGGER.debug("Executing query: {} in table: {}", query, tableName);
+        }
 
         List<T> list = convertDocumentStreamToIterable(store.find(query), entityClass);
 
@@ -360,4 +360,17 @@ public class MapRTemplate implements MapROperations {
             throw new RuntimeJsonMappingException("Id was not found in class " + entityClass.toString());
     }
 
+    /**
+     * Tries to convert the given {@link RuntimeException} into a {@link DataAccessException} but returns the original
+     * exception if the conversation failed. Thus allows safe re-throwing of the return value.
+     *
+     * @param ex                  the exception to translate
+     * @param exceptionTranslator the {@link PersistenceExceptionTranslator} to be used for translation
+     * @return
+     */
+    private static RuntimeException potentiallyConvertRuntimeException(RuntimeException ex,
+                                                                       PersistenceExceptionTranslator exceptionTranslator) {
+        RuntimeException resolved = exceptionTranslator.translateExceptionIfPossible(ex);
+        return resolved == null ? ex : resolved;
+    }
 }

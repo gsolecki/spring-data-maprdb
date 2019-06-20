@@ -10,7 +10,7 @@ import org.springframework.data.repository.query.RepositoryQuery;
 import java.util.List;
 
 public abstract class AbstractMapRQuery implements RepositoryQuery {
-    private final static Logger LOGGER = LoggerFactory.getLogger(AbstractMapRQuery.class);
+    private static final Logger LOGGER = LoggerFactory.getLogger(AbstractMapRQuery.class);
 
     protected final MapROperations operations;
     protected final MapRQueryMethod method;
@@ -67,10 +67,10 @@ public abstract class AbstractMapRQuery implements RepositoryQuery {
         // TODO Make normal exists queries
         if (isExistsQuery()) {
             LOGGER.warn("Exists queries are working not in optimal way, please don't use them without necessity");
-            return records.size() > 0;
+            return !records.isEmpty();
         }
 
-        return records.size() > 0 ? records.get(0) : null;
+        return !records.isEmpty() ? records.get(0) : null;
     }
 
 }

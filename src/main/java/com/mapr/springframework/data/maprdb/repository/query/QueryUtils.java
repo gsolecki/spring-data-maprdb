@@ -20,6 +20,10 @@ import java.util.Iterator;
 
 public class QueryUtils {
 
+    private QueryUtils() {
+        throw new IllegalStateException("Utility class");
+    }
+
     public static QueryCondition getQueryCondition(Connection connection, PartTree tree, Object[] parameters) {
         Iterator parametersIterator = Arrays.asList(parameters).iterator();
 

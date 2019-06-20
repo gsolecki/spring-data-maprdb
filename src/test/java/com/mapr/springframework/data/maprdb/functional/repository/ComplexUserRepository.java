@@ -10,7 +10,7 @@ import org.springframework.data.domain.Sort;
 import java.util.List;
 import java.util.Optional;
 
-public interface ComplexUserRepository  extends MapRRepository<User, String> {
+public interface ComplexUserRepository extends MapRRepository<User, String> {
     List<User> findByName(String name);
 
     List<User> findByNameNot(String name);
@@ -57,11 +57,12 @@ public interface ComplexUserRepository  extends MapRRepository<User, String> {
 
     void deleteByName(String name);
 
-    @Query("{\"$and\":[ {\"$eq\":{\"enabled\":true}}]}")
+    @Query("{\"$where\":{\"$and\":[{\"$eq\":{\"enabled\":true}}]}}")
     List<User> findCustom();
 
-    @DeleteQuery("{\"$and\":[ {\"$eq\":{\"enabled\":true}}]}")
+    @DeleteQuery("{\"$where\":{\"$and\":[{\"$eq\":{\"enabled\":true}}]}}")
     void deleteCustom();
 
     List<User> findByNameContaining(String name);
+
 }
